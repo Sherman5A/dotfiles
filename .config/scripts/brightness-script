@@ -1,0 +1,65 @@
+#!/bin/env bash
+
+help() {
+    echo "Help menu"
+    echo "-i Increase the brightness by the amount given and send a notifcaiton"
+    echo "-d Decrease the brightness by the amount given and send a notifcation"
+}
+
+brightnessValue() {
+    current_brightness=$(brillo -q -G)
+    current_brightness=${current_brightness%.*}
+}
+
+notificationIcon() {
+    brightnessValue
+
+    if [ $current_brightness -lt 33 ]; then
+	echo "/usr/share/icons/Papirus-Dark/symbolic/status/display-brightness-low-symbolic.svg"
+    elif [ $current_brightness -lt 66 ]; then
+	echo "/usr/share/icons/Papirus-Dark/symbolic/status/display-brightness-medium-symbolic.svg"
+    else
+	echo "/usr/share/icons/Papirus-Dark/symbolic/status/display-brightness-high-symbolic.svg"
+    fi
+}
+
+changeBrightness() { 
+
+    if [ $1 -eq 1 ] ; then
+	echo "Raising"
+	brillo -q -A $2
+    else
+	echo "lowering"
+	brillo -q -U $2
+    fi
+}
+
+sendNotifcation() {
+    brightnessValue
+    main_message="Brightness at ${current_brightness}%"
+    notify-send "Brightness" --icon=$(notificationIcon) --urgency=low \
+	    --hint=string:x-dunst-stack-tag:brightness --hint=int:value:$current_brightness "$main_message" 
+    # dunst stack allows consecutive notifications with the tag "brightness" to stack, and not show duplicate numbers
+    # int allows for a bar
+}
+
+# Process arguments
+
+while getopts "hi:d:" option; do
+    case $option in
+        h) # Display help page
+	    help
+	    exit;;
+	i) # Increase the brightness
+	    changeBrightness "1" "$OPTARG"
+	    sendNotifcation;;
+	d) # Decrease the brightness
+	    changeBrightness "-1" "$OPTARG"
+	    sendNotifcation;;
+	\?) # Invalid option catch
+	    echo "Invalid option"
+	    exit;
+    esac
+done
+
+exit

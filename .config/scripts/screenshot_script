@@ -1,0 +1,20 @@
+#!/bin/env bash
+
+
+while getopts "fas" option; do
+    case $option in
+        f)
+              maim ~/Pictures/Screenshots/$(date +%s).jpg;;
+	a)
+              maim -Bi $(xdotool selectwindow) ~/Pictures/Screenshots/$(date +%s).jpg;;
+	s)
+              maim -s ~/Pictures/Screenshots/$(date +%s).jpg;;
+
+    esac
+done
+
+filename=$(ls ~/Pictures/Screenshots -t | head -n 1)
+notify-send "Screenshot" --icon="~/Pictures/Screenshots/"$filename --urgency=normal "Screenshot saved!"
+
+exit
+

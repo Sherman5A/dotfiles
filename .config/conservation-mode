@@ -1,0 +1,53 @@
+#!/bin/env bash
+
+# Help menu
+
+Help() {
+    
+    echo "Help menus for changing the battery conservation mode"
+    echo "-g    Get the current setting of the mode"
+    echo "-s    Set the mode to either 0 or 1 (0 off, 1 on)"
+}
+
+# Get current value
+
+CurrentValue() {
+    
+    current_value=$(cat /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode)
+    if [ $current_value -eq 0 ]; then
+        echo "Not in conservation mode"
+    else
+        echo "In conservation mode"
+    fi
+}
+
+# Set the value
+
+SetValue() {
+    if [ $1 -eq 0 ]; then
+        echo "Setting conservation mode to off"
+    else
+        echo "Setting conservaiton mode to on"
+    fi
+    echo $1 | tee /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode >/dev/null
+}
+
+# Process input options
+
+while getopts ":hgs:" option; do
+    case $option in
+        h) # Display help
+            Help
+            exit;;
+        g) # Display CurrentValue
+            CurrentValue
+            exit;;
+        s) # Turn on / off
+            SetValue "$OPTARG";;
+       \?) # Invalid option
+            echo "Invalid option"
+            exit;;
+    esac
+done
+
+exit

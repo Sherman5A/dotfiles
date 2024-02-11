@@ -1,0 +1,83 @@
+#!/bin/env bash
+
+help() {
+    echo "Help menu"
+    echo "-i Increase the volume by the amount given and send a notifcaiton"
+    echo "-d Decrease the volume by the amount given and send a notifcation"
+    echo "-m Toggle mute, send notification"
+}
+
+volumeValue() {
+     current_volume=$(pamixer --get-volume-human)
+}
+
+notificationIcon() {
+    volumeValue
+
+    if [ $current_volume = "muted" ] ; then 
+	echo "audio-volume-muted"
+    else
+        volume=${current_volume::-1}
+	
+	if [ $volume -eq 0 ] ; then
+	    echo "audio-volume-muted"
+        elif [ $volume -lt 33 ] ; then
+	    echo "audio-volume-low"
+        elif [ $volume -lt 66 ] ; then
+            echo "audio-volume-medium"
+        else
+            echo "audio-volume-high"
+        fi
+    fi 
+}
+
+changeVolume() { 
+
+    if [ $1 -gt 0 ] ; then
+	pamixer -i $2
+    elif [ $1  -lt 0 ] ; then
+	pamixer -d $2
+    else
+	pamixer -t
+    fi
+}
+
+sendNotifcation() {
+    volumeValue
+    if [ $current_volume == "muted" ]; then
+        main_message="Volume muted"
+        notify-send "Volume" --icon=$(notificationIcon) --urgency=low \
+	    --hint=string:x-dunst-stack-tag:volume "$main_message" --hint=int:value:0
+    else
+	main_message="Volume at $current_volume"
+    	notify-send "Volume" --icon=$(notificationIcon) --urgency=low \
+	    --hint=string:x-dunst-stack-tag:volume --hint=int:value:$current_volume "$main_message" 
+	    # dunst stack allows consecutive notifications with the tag "volume" to stack, and not show 
+	    # duplicate numbers
+    	    # int allows for a bar
+    fi
+}
+
+# Process arguments
+
+while getopts "hi:d:m" option; do
+    case $option in
+        h) # Display help page
+	    help
+	    exit;;
+	i) # Increase the volume
+	    changeVolume "1" "$OPTARG"
+	    sendNotifcation;;
+	d) # Decrease the volume
+	    changeVolume "-1" "$OPTARG"
+	    sendNotifcation;;
+	m) # Mute audio
+	    changeVolume "0"
+	    sendNotifcation;;
+	\?) # Invalid option catch
+	    echo "Invalid option"
+	    exit;
+    esac
+done
+
+exit

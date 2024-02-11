@@ -1,0 +1,32 @@
+
+# System functions
+
+XF86MonBrightnessDown
+    ~/.config/scripts/brightness-script -d 5
+XF86MonBrightnessUp
+    ~/.config/scripts/brightness-script -i 5
+XF86AudioMute
+    ~/.config/scripts/volume-script -m
+XF86AudioLowerVolume
+    ~/.config/scripts/volume-script -d 5
+XF86AudioRaiseVolume
+    ~/.config/scripts/volume-script -i 5
+
+# Screen Capture
+
+Print
+    ~/.config/scripts/screenshot_script -f
+super + Print
+    ~/.config/scripts/screenshot_script -s
+ctrl + Print
+    ~/.config/scripts/screenshot_script -a
+
+# Programs
+
+super + shift + f
+    librewolf
+super + shift + b
+    firefox
+super + shift + t
+    thunar
+

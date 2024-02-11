@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+leftwm-command "UnloadTheme"
+
+# Kill stuff that was started in the up script
